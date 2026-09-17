@@ -42,6 +42,37 @@ export const config = {
    * classified as 'unknown'.
    */
   facilitatorFeePayers: parseFacilitatorMap(process.env.FACILITATOR_FEE_PAYERS),
+
+  /**
+   * Non-organic activity heuristics (TECH-SPEC.md section 4). These
+   * thresholds are our own tunable design choice, not a researched x402/
+   * Solana fact — the "e.g. >10 times in 1 hour" in TECH-SPEC.md was
+   * explicitly an example, not a spec'd number. Override via env vars if
+   * they turn out too strict/loose once there's more real transaction
+   * volume flowing through ingestion.
+   */
+  heuristics: {
+    // Heuristic 1 — repeated identical-amount loop (flags transactions).
+    // "more than N times in 1 hour" -> loopCount must exceed this to flag.
+    identicalAmountLoopThreshold: Number(
+      process.env.HEURISTIC_IDENTICAL_AMOUNT_LOOP_THRESHOLD ?? 10,
+    ),
+
+    // Heuristic 2 — volume without payer growth (flags merchants).
+    // Compares a trailing window against the one before it.
+    volumeWindowDays: Number(process.env.HEURISTIC_VOLUME_WINDOW_DAYS ?? 7),
+    // Current-period volume must be at least this many times the
+    // previous-period volume to count as "rising sharply".
+    volumeGrowthMultiplier: Number(process.env.HEURISTIC_VOLUME_GROWTH_MULTIPLIER ?? 2),
+    // Distinct payer count is allowed to grow by at most this many wallets
+    // (not multiplier — flat headroom) for the volume growth to still look
+    // suspicious. E.g. previous period had 3 payers, this allows up to 4.
+    payerGrowthAllowance: Number(process.env.HEURISTIC_PAYER_GROWTH_ALLOWANCE ?? 1),
+    // Don't evaluate merchants with too little activity to say anything
+    // meaningful — avoids flagging a merchant's very first few real
+    // transactions just because "volume went from $0 to something".
+    minCurrentPeriodTxCount: Number(process.env.HEURISTIC_MIN_CURRENT_PERIOD_TX_COUNT ?? 10),
+  },
 };
 
 function parseFacilitatorMap(raw: string | undefined): Record<string, string> {

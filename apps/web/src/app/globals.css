@@ -25,6 +25,10 @@
   --status-critical-text: #f0837e;
   --status-critical-bg: rgba(208, 59, 59, 0.16);
 
+  --status-warning: #ec835a;
+  --status-warning-text: #f0a67e;
+  --status-warning-bg: rgba(236, 131, 90, 0.16);
+
   --fac-payai: #9085e9;
   --fac-payai-text: #b4abf5;
   --fac-payai-bg: rgba(144, 133, 233, 0.14);
@@ -96,4 +100,22 @@ button {
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
+}
+
+/* Loading-state skeleton blocks — used by each route's loading.tsx. */
+.rs-skeleton {
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 37%, var(--surface-1) 63%);
+  background-size: 400% 100%;
+  animation: rs-skeleton-pulse 1.4s ease infinite;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+}
+
+@keyframes rs-skeleton-pulse {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }

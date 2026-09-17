@@ -4,7 +4,12 @@
 create table if not exists merchants (
   id            text primary key,        -- derived from payee wallet or declared identity
   label         text,                    -- human-readable name if known
-  payee_wallet  text not null
+  payee_wallet  text not null,
+  -- Merchant-level non-organic flag (TECH-SPEC.md section 4, heuristic 2:
+  -- "volume without payer growth" — flags the merchant, not a single tx).
+  -- Existing databases: apply db/migrations/002_add_merchant_flags.sql.
+  is_flagged    boolean default false,
+  flag_reason   text
 );
 
 -- one row per settled x402 payment
@@ -43,3 +48,7 @@ create index if not exists idx_x402_transactions_facilitator
 
 create index if not exists idx_x402_transactions_payer_payee_amount
   on x402_transactions (payer_wallet, payee_wallet, amount_usdc);
+
+create index if not exists idx_merchants_is_flagged
+  on merchants (is_flagged)
+  where is_flagged = true;

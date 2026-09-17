@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { getLeaderboard } from "@/lib/queries";
-import { formatCount, formatUsdcFull, getInitial, avatarGradientFor, formatWallet } from "@/lib/format";
+import { formatCount, formatUsdcFull, getInitial, avatarGradientFor, formatWallet, flagReasonLabel } from "@/lib/format";
 import Topbar from "@/components/Topbar";
 import FacilitatorChip from "@/components/FacilitatorChip";
 import StatusBadge from "@/components/StatusBadge";
@@ -27,7 +28,7 @@ export default async function LeaderboardPage() {
 
           {merchants.length > 0 ? (
             merchants.map((m) => (
-              <div key={m.id} className={styles.row}>
+              <Link key={m.id} href={`/merchant/${m.id}`} className={styles.row}>
                 <div className={`rs-num ${styles.rank}`}>{m.rank}</div>
                 <div className={styles.merchant}>
                   <div className={`rs-num ${styles.avatar}`} style={{ background: avatarGradientFor(m.payeeWallet) }}>
@@ -44,9 +45,9 @@ export default async function LeaderboardPage() {
                 <div className={`rs-num ${styles.volume}`}>{formatUsdcFull(m.volume)}</div>
                 <div className={`rs-num ${styles.txCount}`}>{formatCount(m.txCount)}</div>
                 <div>
-                  <StatusBadge flagged={m.flagged} />
+                  <StatusBadge flagged={m.flagged} reason={flagReasonLabel(m.flagReason)} />
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className={styles.empty}>
@@ -59,7 +60,7 @@ export default async function LeaderboardPage() {
         {merchants.length > 0 ? (
           <div className={styles.footer}>
             <div className={styles.footerCaption}>
-              Showing {merchants.length} merchant{merchants.length === 1 ? "" : "s"}
+              Showing {merchants.length} merchant{merchants.length === 1 ? "" : "s"} — click a row for flag details
             </div>
           </div>
         ) : null}

@@ -1,9 +1,9 @@
 import styles from "./StatusBadge.module.css";
 
-export default function StatusBadge({ flagged }: { flagged: boolean }) {
+export default function StatusBadge({ flagged, reason }: { flagged: boolean; reason?: string | null }) {
   if (flagged) {
     return (
-      <span className={`${styles.badge} ${styles.flagged}`}>
+      <span className={`${styles.badge} ${styles.flagged}`} title={reason ?? undefined}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 9v4" />
           <path d="M12 17h.01" />

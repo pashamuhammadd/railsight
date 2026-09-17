@@ -1,4 +1,4 @@
-import type { Facilitator } from "@railsight/shared";
+import type { Facilitator, FlagReason } from "@railsight/shared";
 
 /** "$8,420.10" — used for table cells / lists where precision matters. */
 export function formatUsdcFull(amount: number): string {
@@ -31,6 +31,19 @@ export function formatWallet(wallet: string): string {
 export function formatDayLabel(day: string | Date): string {
   const d = typeof day === "string" ? new Date(day) : day;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** "Sep 15, 2026, 14:02" — transaction list timestamps. */
+export function formatDateTime(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
 }
 
 export function formatPercent(fraction: number, digits = 0): string {
@@ -82,4 +95,14 @@ export const FACILITATOR_LABELS: Record<Facilitator, string> = {
 
 export function facilitatorLabel(facilitator: string): string {
   return FACILITATOR_LABELS[facilitator as Facilitator] ?? facilitator;
+}
+
+export const FLAG_REASON_LABELS: Record<FlagReason, string> = {
+  repeated_identical_amount_loop: "Repeated identical-amount loop",
+  volume_without_payer_growth: "Volume without payer growth",
+};
+
+export function flagReasonLabel(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  return FLAG_REASON_LABELS[reason as FlagReason] ?? reason;
 }

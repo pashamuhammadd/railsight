@@ -116,7 +116,7 @@ export default async function OverviewPage() {
 
             {topMerchants.length > 0 ? (
               topMerchants.map((m) => (
-                <Link key={m.id} href="/leaderboard" className={styles.merchantRow}>
+                <Link key={m.id} href={`/merchant/${m.id}`} className={styles.merchantRow}>
                   <div className={`rs-num ${styles.merchantAvatar}`} style={{ background: avatarGradientFor(m.payeeWallet) }}>
                     {getInitial(m.label, m.payeeWallet)}
                   </div>
