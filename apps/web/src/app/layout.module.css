@@ -1,0 +1,36 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--page);
+  position: relative;
+}
+
+.glowOne {
+  position: absolute;
+  top: -220px;
+  left: 320px;
+  width: 640px;
+  height: 640px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.16) 0%, rgba(139, 92, 246, 0) 70%);
+  pointer-events: none;
+}
+
+.glowTwo {
+  position: absolute;
+  top: -160px;
+  left: 760px;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.12) 0%, rgba(45, 212, 191, 0) 70%);
+  pointer-events: none;
+}
+
+.main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
