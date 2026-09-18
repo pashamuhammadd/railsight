@@ -18,11 +18,11 @@ export default function VolumeSpikeAlert({ spike }: { spike: VolumeSpike }) {
       <span className={styles.dot} aria-hidden="true" />
       <div className={styles.body}>
         <div className={styles.headline}>
-          Volume spike — {spike.multiplier.toFixed(1)}x the usual pace over the last {spike.windowHours}h
+          Volume spike: {spike.multiplier.toFixed(1)}x the usual pace over the last {spike.windowHours}h
         </div>
         <div className={styles.detail}>
           {formatUsdcCompact(spike.currentVolume)} settled across {formatCount(spike.currentTxCount)} transaction
-          {spike.currentTxCount === 1 ? "" : "s"} in the last {spike.windowHours}h — well above the recent daily
+          {spike.currentTxCount === 1 ? "" : "s"} in the last {spike.windowHours}h. Well above the recent daily
           average.
         </div>
       </div>

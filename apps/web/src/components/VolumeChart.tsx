@@ -12,7 +12,7 @@ export default function VolumeChart({ points }: { points: DailyVolumePoint[] }) 
   if (points.length === 0) {
     return (
       <div className={styles.empty}>
-        No settled x402 transactions in this window yet — this fills in as ingestion runs.
+        No settled x402 transactions in this window yet. This fills in as ingestion runs.
       </div>
     );
   }

@@ -222,3 +222,33 @@
   font-size: 13px;
   color: var(--text-tertiary);
 }
+
+/* Mobile: the ranked table has too many columns to reflow, so instead it
+   scrolls horizontally inside its card. min-width on the rows keeps every
+   column readable instead of getting crushed. */
+@media (max-width: 768px) {
+  .content {
+    padding: 18px 16px 32px;
+    gap: 16px;
+  }
+
+  .table {
+    overflow-x: auto;
+  }
+
+  .headerRowMerchants,
+  .rowMerchants {
+    grid-template-columns: 44px 200px 150px 140px 100px 120px;
+    min-width: 754px;
+  }
+
+  .headerRowPayers,
+  .rowPayers {
+    grid-template-columns: 44px 200px 130px 100px 120px 150px;
+    min-width: 744px;
+  }
+
+  .footer {
+    padding: 4px 20px 0;
+  }
+}

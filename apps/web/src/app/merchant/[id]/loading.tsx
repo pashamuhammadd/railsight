@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ProfileIcon from "@/components/ProfileIcon";
 import styles from "./page.module.css";
 
 export default function MerchantDetailLoading() {
@@ -11,7 +12,9 @@ export default function MerchantDetailLoading() {
           </svg>
           Leaderboard
         </Link>
-        <div className={`rs-num ${styles.avatar}`}>P</div>
+        <div className={styles.avatar}>
+          <ProfileIcon size={18} />
+        </div>
       </div>
 
       <div className={styles.content}>

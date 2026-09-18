@@ -107,3 +107,27 @@
 .avatar:hover {
   transform: scale(1.08);
 }
+
+@media (max-width: 640px) {
+  .topbar {
+    height: auto;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .rangeBadge {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}

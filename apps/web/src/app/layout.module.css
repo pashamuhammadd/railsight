@@ -60,3 +60,23 @@
   flex-direction: column;
   min-width: 0;
 }
+
+/* Mobile: sidebar becomes a horizontal top bar (see Sidebar.module.css),
+   so the shell stacks vertically instead of sitting side by side. */
+@media (max-width: 768px) {
+  .shell {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .main {
+    min-height: 0;
+  }
+
+  /* Decorative background glows are tuned for a wide desktop canvas and
+     just add clutter/overdraw on small screens. */
+  .glowOne,
+  .glowTwo {
+    display: none;
+  }
+}

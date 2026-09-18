@@ -14,6 +14,7 @@ import FacilitatorChip from "@/components/FacilitatorChip";
 import StatTile from "@/components/StatTile";
 import VolumeChart from "@/components/VolumeChart";
 import AnimatedValue from "@/components/AnimatedValue";
+import ProfileIcon from "@/components/ProfileIcon";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,9 @@ export default async function MerchantDetailPage({ params }: { params: Promise<{
           </svg>
           Leaderboard
         </Link>
-        <div className={`rs-num ${styles.avatar}`}>P</div>
+        <div className={styles.avatar}>
+          <ProfileIcon size={18} />
+        </div>
       </div>
 
       <div className={styles.content}>
@@ -86,7 +89,7 @@ export default async function MerchantDetailPage({ params }: { params: Promise<{
                 <path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
               </svg>
               <div style={{ flex: 1 }}>
-                <div className={styles.flagHeadline}>Flagged — {flag.headline}</div>
+                <div className={styles.flagHeadline}>Flagged: {flag.headline}</div>
                 <div className={styles.flagDetail}>{flag.detail}</div>
               </div>
               {flag.occurredAt ? <span className={`rs-num ${styles.flagDate}`}>{formatDateTime(flag.occurredAt)}</span> : null}

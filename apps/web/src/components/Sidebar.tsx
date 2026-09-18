@@ -37,7 +37,7 @@ export default function Sidebar() {
     <div className={styles.sidebar}>
       <div className={styles.brand}>
         <div className={styles.mark}>
-          <svg viewBox="0 0 100 100" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="4 4 72 72" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
             <circle cx="40" cy="40" r="22" fill="none" stroke="#FFFFFF" strokeWidth="9" />
             <rect x="30" y="44" width="6" height="8" rx="1.5" fill="#FFFFFF" />
             <rect x="38" y="38" width="6" height="14" rx="1.5" fill="#FFFFFF" />
@@ -53,7 +53,7 @@ export default function Sidebar() {
           return (
             <a key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={active ? styles.navLinkActive : styles.navLink}>
               {item.icon}
-              {active ? <span className={styles.navLinkActiveLabel}>{item.label}</span> : item.label}
+              <span className={active ? styles.navLinkActiveLabel : styles.navLinkLabel}>{item.label}</span>
             </a>
           );
         })}
@@ -85,7 +85,7 @@ export default function Sidebar() {
           <span className={styles.statusDot} />
           Solana Mainnet
         </div>
-        <div className={styles.statusVersion}>RailSight v0.1 — Week 2 build</div>
+        <div className={styles.statusVersion}>RailSight v0.1 · Week 2 build</div>
       </div>
     </div>
   );

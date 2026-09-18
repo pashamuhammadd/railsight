@@ -1,3 +1,4 @@
+import ProfileIcon from "./ProfileIcon";
 import styles from "./Topbar.module.css";
 
 export default function Topbar({
@@ -22,7 +23,9 @@ export default function Topbar({
           </div>
         ) : null}
         <div className={styles.divider} />
-        <div className={`rs-num ${styles.avatar}`}>P</div>
+        <div className={styles.avatar}>
+          <ProfileIcon size={18} />
+        </div>
       </div>
     </div>
   );

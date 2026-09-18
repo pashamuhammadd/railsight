@@ -445,3 +445,47 @@
   font-size: 13px;
   color: var(--text-tertiary);
 }
+
+@media (max-width: 768px) {
+  .backBar {
+    padding: 0 16px;
+  }
+
+  .content {
+    padding: 20px 16px 32px;
+    gap: 18px;
+  }
+
+  .headerCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .scorePanel {
+    width: 100%;
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .kpiGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .table {
+    overflow-x: auto;
+  }
+
+  .headerRow,
+  .row {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}

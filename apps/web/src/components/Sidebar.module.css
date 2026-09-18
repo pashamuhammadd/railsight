@@ -97,7 +97,12 @@
   color: var(--text-primary);
 }
 
+.navLinkLabel {
+  white-space: nowrap;
+}
+
 .navLinkActiveLabel {
+  composes: navLinkLabel;
   background: linear-gradient(90deg, #c9c3ff, var(--accent-teal-2));
   -webkit-background-clip: text;
   background-clip: text;
@@ -163,4 +168,54 @@
 .statusVersion {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* Mobile: the 240px vertical rail becomes a compact horizontal top bar —
+   brand mark + name on the left, primary nav on the right. The "coming
+   soon" links and the network-status footer are dropped to keep it to a
+   single row on small screens. */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .navLink,
+  .navLinkActive {
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .navSoon,
+  .status {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .brandName {
+    display: none;
+  }
+
+  .navLinkLabel,
+  .navLinkActiveLabel {
+    display: none;
+  }
+
+  .navLink,
+  .navLinkActive {
+    padding: 8px;
+  }
 }

@@ -81,7 +81,7 @@ async function MerchantLeaderboard() {
           ))
         ) : (
           <div className={styles.empty}>
-            No tracked merchants yet — add wallets to the <code>merchants</code> table (or set{" "}
+            No tracked merchants yet. Add wallets to the <code>merchants</code> table (or set{" "}
             <code>SEED_MERCHANT_WALLETS</code> for the ingestion worker) to see them here.
           </div>
         )}
@@ -90,7 +90,7 @@ async function MerchantLeaderboard() {
       {merchants.length > 0 ? (
         <div className={styles.footer}>
           <div className={styles.footerCaption}>
-            Showing {merchants.length} merchant{merchants.length === 1 ? "" : "s"} — click a row for flag details
+            Showing {merchants.length} merchant{merchants.length === 1 ? "" : "s"}. Click a row for flag details
           </div>
         </div>
       ) : null}
@@ -134,7 +134,7 @@ async function PayerLeaderboard() {
           ))
         ) : (
           <div className={styles.empty}>
-            No payer activity yet — once transactions come in, the wallets paying the most across all
+            No payer activity yet. Once transactions come in, the wallets paying the most across all
             merchants will show up here.
           </div>
         )}

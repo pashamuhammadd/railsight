@@ -131,7 +131,7 @@ export default async function OverviewPage() {
                 </Link>
               ))
             ) : (
-              <div className={styles.emptyRow}>No merchant volume yet — run the ingestion worker to pull in transactions.</div>
+              <div className={styles.emptyRow}>No merchant volume yet. Run the ingestion worker to pull in transactions.</div>
             )}
           </div>
         </div>

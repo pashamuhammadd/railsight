@@ -297,3 +297,26 @@
   color: var(--text-tertiary);
   padding: 12px 8px;
 }
+
+@media (max-width: 860px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 18px 16px 32px;
+    gap: 18px;
+  }
+
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
