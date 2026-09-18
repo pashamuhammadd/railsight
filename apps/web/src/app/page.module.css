@@ -1,3 +1,42 @@
+/* Local copies of the shared keyframes used below. Next.js/Turbopack's CSS
+   Modules loader (Lightning CSS) rewrites any animation-name it finds inside
+   a .module.css file into a per-file hashed name — even when there is no
+   local @keyframes with that name. If the real @keyframes only lives in the
+   global globals.css, the hashed name in the compiled output never matches
+   anything and the animation silently no-ops, leaving `opacity: 0` stuck
+   forever. Defining the keyframes again *inside this file* makes Lightning
+   CSS scope the definition and the usage to the same hashed name, so the
+   animation actually resolves. Keep this block in sync with globals.css if
+   you tweak the motion system. */
+@keyframes rs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rs-scale-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .content {
   padding: 28px 32px 40px;
   display: flex;

@@ -1,3 +1,25 @@
+/* Local copies of the shared keyframes used below — see the comment in
+   page.module.css for why these can't just reference globals.css. */
+@keyframes rs-float-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, 40px) scale(1.08);
+  }
+}
+
+@keyframes rs-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-36px, -24px) scale(1.06);
+  }
+}
+
 .shell {
   display: flex;
   min-height: 100vh;

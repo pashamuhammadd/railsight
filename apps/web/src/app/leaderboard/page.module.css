@@ -1,3 +1,17 @@
+/* Local copy of the shared keyframe used below — see the comment in
+   page.module.css (the overview page) for why this can't just reference
+   globals.css. */
+@keyframes rs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .content {
   padding: 28px 32px 40px;
   display: flex;
