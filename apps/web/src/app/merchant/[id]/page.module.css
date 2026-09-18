@@ -7,6 +7,7 @@
   justify-content: space-between;
   padding: 0 32px;
   border-bottom: 1px solid var(--border);
+  animation: rs-fade-in 0.4s ease both;
 }
 
 .backLink {
@@ -16,6 +17,19 @@
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.backLink svg {
+  transition: transform 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+}
+
+.backLink:hover svg {
+  transform: translateX(-3px);
 }
 
 .avatar {
@@ -23,6 +37,8 @@
   height: 34px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent-violet), var(--accent-teal));
+  background-size: 200% 200%;
+  animation: rs-gradient-shift 6s ease-in-out infinite;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,6 +68,8 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  opacity: 0;
+  animation: rs-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
 }
 
 .headerAvatar {
@@ -64,6 +82,8 @@
   font-size: 20px;
   font-weight: 700;
   flex-shrink: 0;
+  opacity: 0;
+  animation: rs-pop-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
 }
 
 .headerInfo {
@@ -139,6 +159,8 @@
 .scoreFill {
   height: 100%;
   border-radius: 999px;
+  transform-origin: left center;
+  animation: rs-scale-x 0.8s cubic-bezier(0.16, 1, 0.3, 1) 320ms both;
 }
 
 .scoreCaption {
@@ -155,6 +177,8 @@
   display: flex;
   gap: 14px;
   align-items: flex-start;
+  opacity: 0;
+  animation: rs-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) 220ms both, rs-pulse-glow 3s ease-in-out 1.2s infinite;
 }
 
 .flagIcon {
@@ -192,6 +216,8 @@
   align-items: center;
   font-size: 13px;
   color: var(--status-good-text);
+  opacity: 0;
+  animation: rs-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
 }
 
 .kpiGrid {
@@ -200,11 +226,35 @@
   gap: 18px;
 }
 
+.kpiGrid > * {
+  opacity: 0;
+  animation: rs-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.kpiGrid > *:nth-child(1) {
+  animation-delay: 300ms;
+}
+.kpiGrid > *:nth-child(2) {
+  animation-delay: 360ms;
+}
+.kpiGrid > *:nth-child(3) {
+  animation-delay: 420ms;
+}
+
 .panel {
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: 24px;
+  opacity: 0;
+  animation: rs-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 480ms both;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
 }
 
 .panelTitle {
@@ -224,6 +274,8 @@
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  opacity: 0;
+  animation: rs-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 560ms both;
 }
 
 .tableTitle {
@@ -247,12 +299,49 @@
 }
 
 .row {
+  position: relative;
   display: grid;
   grid-template-columns: 1.2fr 1fr 1.4fr 130px 160px;
   gap: 12px;
   padding: 13px 22px;
   align-items: center;
   border-bottom: 1px solid var(--border-soft);
+  opacity: 0;
+  animation: rs-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 900ms;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--accent-violet), var(--accent-teal));
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.row:nth-child(3) {
+  animation-delay: 660ms;
+}
+.row:nth-child(4) {
+  animation-delay: 700ms;
+}
+.row:nth-child(5) {
+  animation-delay: 740ms;
+}
+.row:nth-child(6) {
+  animation-delay: 780ms;
+}
+.row:nth-child(7) {
+  animation-delay: 820ms;
+}
+.row:nth-child(8) {
+  animation-delay: 860ms;
 }
 
 .row:last-child {
@@ -261,6 +350,11 @@
 
 .row:hover {
   background: var(--surface-2);
+  transform: translateX(2px);
+}
+
+.row:hover::before {
+  transform: scaleY(1);
 }
 
 .sig {

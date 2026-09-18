@@ -14,6 +14,8 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgba(139, 92, 246, 0.16) 0%, rgba(139, 92, 246, 0) 70%);
   pointer-events: none;
+  animation: rs-float-a 22s ease-in-out infinite;
+  will-change: transform;
 }
 
 .glowTwo {
@@ -25,6 +27,8 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgba(45, 212, 191, 0.12) 0%, rgba(45, 212, 191, 0) 70%);
   pointer-events: none;
+  animation: rs-float-b 26s ease-in-out infinite;
+  will-change: transform;
 }
 
 .main {

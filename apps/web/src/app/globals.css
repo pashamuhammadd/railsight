@@ -119,3 +119,152 @@ button {
     background-position: 0 50%;
   }
 }
+
+/* ------------------------------------------------------------------------ */
+/* Motion system — shared keyframes + a couple of utility classes used to   */
+/* make the dashboard feel alive: entrances, hovers, chart draw-in, live    */
+/* "pulse" indicators. Kept deliberately subtle — short durations, soft     */
+/* easing — and fully disabled under prefers-reduced-motion below.         */
+/* ------------------------------------------------------------------------ */
+
+@keyframes rs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rs-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rs-scale-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rs-char-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes rs-float-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, 40px) scale(1.08);
+  }
+}
+
+@keyframes rs-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-36px, -24px) scale(1.06);
+  }
+}
+
+@keyframes rs-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes rs-pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(12, 163, 12, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(12, 163, 12, 0.05);
+  }
+}
+
+@keyframes rs-pulse-point {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes rs-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(208, 59, 59, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(208, 59, 59, 0.08);
+  }
+}
+
+@keyframes rs-draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Per-character reveal used by <AnimatedValue> for KPI numbers / scores. */
+.rs-char {
+  display: inline-block;
+  opacity: 0;
+  animation: rs-char-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

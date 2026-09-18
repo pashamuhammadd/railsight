@@ -22,6 +22,8 @@
   height: 34px;
   border-radius: 9px;
   background: linear-gradient(135deg, var(--accent-violet), var(--accent-teal));
+  background-size: 200% 200%;
+  animation: rs-gradient-shift 6s ease-in-out infinite;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +51,21 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.navLink svg {
+  transition: transform 0.2s ease;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  transform: translateX(2px);
+}
+
+.navLink:hover svg {
+  transform: scale(1.08);
 }
 
 .navLinkActive {
@@ -118,6 +135,7 @@
   border-radius: 50%;
   background: var(--status-good);
   box-shadow: 0 0 0 3px rgba(12, 163, 12, 0.18);
+  animation: rs-pulse-dot 2.4s ease-in-out infinite;
 }
 
 .statusVersion {

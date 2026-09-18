@@ -110,7 +110,7 @@ export default async function OverviewPage() {
             <div className={styles.sidePanelHead}>
               <div className={styles.panelTitle}>Top merchants</div>
               <Link href="/leaderboard" className={styles.viewAllLink}>
-                View all →
+                View all <span className={styles.arrow}>→</span>
               </Link>
             </div>
 

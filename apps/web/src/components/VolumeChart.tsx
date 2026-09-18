@@ -42,25 +42,66 @@ export default function VolumeChart({ points }: { points: DailyVolumePoint[] }) 
           <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <line x1="0" y1={CHART_BOTTOM} x2={WIDTH} y2={CHART_BOTTOM} stroke="#26262F" strokeWidth="1" />
-      <line x1="0" y1={(CHART_BOTTOM + CHART_TOP) / 2} x2={WIDTH} y2={(CHART_BOTTOM + CHART_TOP) / 2} stroke="#1D1D28" strokeWidth="1" />
-      <line x1="0" y1={CHART_TOP} x2={WIDTH} y2={CHART_TOP} stroke="#1D1D28" strokeWidth="1" />
 
-      {areaPath ? <path d={areaPath} fill="url(#volFill)" /> : null}
+      <line className={styles.gridLine} x1="0" y1={CHART_BOTTOM} x2={WIDTH} y2={CHART_BOTTOM} stroke="#26262F" strokeWidth="1" />
+      <line
+        className={styles.gridLine}
+        x1="0"
+        y1={(CHART_BOTTOM + CHART_TOP) / 2}
+        x2={WIDTH}
+        y2={(CHART_BOTTOM + CHART_TOP) / 2}
+        stroke="#1D1D28"
+        strokeWidth="1"
+        style={{ animationDelay: "80ms" }}
+      />
+      <line className={styles.gridLine} x1="0" y1={CHART_TOP} x2={WIDTH} y2={CHART_TOP} stroke="#1D1D28" strokeWidth="1" style={{ animationDelay: "140ms" }} />
+
+      {areaPath ? <path d={areaPath} fill="url(#volFill)" className={styles.area} /> : null}
+
       {coords.length > 1 ? (
-        <path d={linePath} fill="none" stroke="#A78BFA" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <>
+          <path
+            d={linePath}
+            fill="none"
+            stroke="#A78BFA"
+            strokeWidth="2.5"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            pathLength={1}
+            className={styles.line}
+          />
+          <circle cx={lastCoord.x} cy={lastCoord.y} r="4.5" fill="#0B0B12" stroke="#7FEFDD" strokeWidth="2.5" className={styles.lastPoint} />
+        </>
       ) : (
-        <circle cx={coords[0].x} cy={coords[0].y} r="4.5" fill="#0B0B12" stroke="#7FEFDD" strokeWidth="2.5" />
+        <circle cx={coords[0].x} cy={coords[0].y} r="4.5" fill="#0B0B12" stroke="#7FEFDD" strokeWidth="2.5" className={styles.lastPoint} />
       )}
 
-      <text x="0" y={HEIGHT - 4} fontSize="11" fill="#6E6F7C" fontFamily="Plus Jakarta Sans, sans-serif">
+      <text x="0" y={HEIGHT - 4} fontSize="11" fill="#6E6F7C" fontFamily="Plus Jakarta Sans, sans-serif" className={styles.axisLabel}>
         {formatDayLabel(firstPoint.day)}
       </text>
-      <text x={WIDTH} y={HEIGHT - 4} fontSize="11" fill="#6E6F7C" fontFamily="Plus Jakarta Sans, sans-serif" textAnchor="end">
+      <text
+        x={WIDTH}
+        y={HEIGHT - 4}
+        fontSize="11"
+        fill="#6E6F7C"
+        fontFamily="Plus Jakarta Sans, sans-serif"
+        textAnchor="end"
+        className={styles.axisLabel}
+        style={{ animationDelay: "60ms" }}
+      >
         {formatDayLabel(lastPoint.day)}
       </text>
 
-      <text x={lastCoord.x} y={Math.max(lastCoord.y - 10, 14)} fontSize="12" fill="#F5F5F7" fontFamily="Space Grotesk, sans-serif" fontWeight="600" textAnchor="end">
+      <text
+        x={lastCoord.x}
+        y={Math.max(lastCoord.y - 10, 14)}
+        fontSize="12"
+        fill="#F5F5F7"
+        fontFamily="Space Grotesk, sans-serif"
+        fontWeight="600"
+        textAnchor="end"
+        className={styles.priceLabel}
+      >
         {formatUsdcFull(lastPoint.volume)}
       </text>
     </svg>

@@ -6,6 +6,12 @@
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 999px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
 }
 
 .flagged {

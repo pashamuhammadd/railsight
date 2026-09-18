@@ -13,6 +13,7 @@ import {
 import FacilitatorChip from "@/components/FacilitatorChip";
 import StatTile from "@/components/StatTile";
 import VolumeChart from "@/components/VolumeChart";
+import AnimatedValue from "@/components/AnimatedValue";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -65,7 +66,7 @@ export default async function MerchantDetailPage({ params }: { params: Promise<{
             <div className={styles.scoreHead}>
               <span className={styles.scoreLabel}>Verified-volume score</span>
               <span className={`rs-num ${styles.scoreValue}`}>
-                {detail.verifiedScore}
+                <AnimatedValue value={String(detail.verifiedScore)} />
                 <span className={styles.scoreMax}>/100</span>
               </span>
             </div>

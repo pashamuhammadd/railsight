@@ -9,4 +9,42 @@
   color: var(--text-tertiary);
   border: 1px dashed var(--border);
   border-radius: var(--radius-md);
+  opacity: 0;
+  animation: rs-fade-in 0.5s ease both;
+}
+
+/* Chart draw-in sequence: gridlines fade → line draws → area fills in →
+   the last point pops in and settles into a slow "live" pulse. */
+
+.gridLine {
+  opacity: 0;
+  animation: rs-fade-in 0.4s ease forwards;
+}
+
+.line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rs-draw-line 1.05s cubic-bezier(0.65, 0, 0.35, 1) 150ms forwards;
+}
+
+.area {
+  opacity: 0;
+  animation: rs-fade-in 0.5s ease 900ms forwards;
+}
+
+.lastPoint {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: rs-pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards, rs-pulse-point 2.2s ease-in-out 1.5s infinite;
+}
+
+.axisLabel {
+  opacity: 0;
+  animation: rs-fade-in 0.5s ease 200ms forwards;
+}
+
+.priceLabel {
+  opacity: 0;
+  animation: rs-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) 1.25s forwards;
 }
