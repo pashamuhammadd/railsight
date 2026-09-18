@@ -19,6 +19,34 @@
   gap: 18px;
 }
 
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+}
+
+.tab {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tab:hover {
+  color: #c7c8d4;
+}
+
+.tabActive {
+  background: var(--surface-2);
+  color: #f4f4f8;
+}
+
 .table {
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
@@ -30,7 +58,6 @@
 
 .headerRow {
   display: grid;
-  grid-template-columns: 56px 1fr 170px 150px 110px 130px;
   gap: 12px;
   padding: 12px 20px;
   font-size: 11px;
@@ -41,10 +68,19 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
+/* Column layout differs per view — same base .headerRow/.row rules, one of
+   these added on top to set grid-template-columns for that view. */
+.headerRowMerchants {
+  grid-template-columns: 56px 1fr 170px 150px 110px 130px;
+}
+
+.headerRowPayers {
+  grid-template-columns: 56px 1fr 150px 110px 130px 170px;
+}
+
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 56px 1fr 170px 150px 110px 130px;
   gap: 12px;
   padding: 14px 20px;
   align-items: center;
@@ -53,6 +89,14 @@
   animation: rs-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: 420ms;
   transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.rowMerchants {
+  grid-template-columns: 56px 1fr 170px 150px 110px 130px;
+}
+
+.rowPayers {
+  grid-template-columns: 56px 1fr 150px 110px 130px 170px;
 }
 
 .row::before {

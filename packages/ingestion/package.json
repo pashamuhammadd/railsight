@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "build": "tsc -p tsconfig.json",
     "once": "tsx src/index.ts --once",
+    "discover": "tsx src/index.ts --discover-only",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

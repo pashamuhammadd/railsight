@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Facilitator } from "@railsight/shared";
-import { getOverview } from "@/lib/queries";
+import { getOverview, getVolumeSpike } from "@/lib/queries";
 import { formatCount, formatDeltaPercent, formatPercent, formatUsdcCompact, formatUsdcFull, getInitial, avatarGradientFor, facilitatorLabel, formatWallet } from "@/lib/format";
 import Topbar from "@/components/Topbar";
 import StatTile, { type DeltaTone } from "@/components/StatTile";
 import VolumeChart from "@/components/VolumeChart";
+import VolumeSpikeAlert from "@/components/VolumeSpikeAlert";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ const FACILITATOR_SWATCH: Record<Facilitator, string> = {
 };
 
 export default async function OverviewPage() {
-  const overview = await getOverview(30);
+  const [overview, spike] = await Promise.all([getOverview(30), getVolumeSpike(24)]);
   const { totals, dailyVolume, facilitatorBreakdown, topMerchants } = overview;
 
   const volumeDelta = formatDeltaPercent(totals.totalVolume, totals.previousVolume);
@@ -61,6 +62,8 @@ export default async function OverviewPage() {
       <Topbar title="Overview" subtitle="x402 payment activity on Solana" rangeLabel={`Last ${overview.windowDays} days`} />
 
       <div className={styles.content}>
+        <VolumeSpikeAlert spike={spike} />
+
         <div className={styles.kpiGrid}>
           {kpis.map((kpi) => (
             <StatTile key={kpi.label} label={kpi.label} value={kpi.value} delta={kpi.delta} deltaTone={kpi.deltaTone} deltaCaption={kpi.deltaCaption} />

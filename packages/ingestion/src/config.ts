@@ -44,6 +44,19 @@ export const config = {
   facilitatorFeePayers: parseFacilitatorMap(process.env.FACILITATOR_FEE_PAYERS),
 
   /**
+   * Auto-discovery of Solana x402 merchants via Coinbase CDP's public
+   * Bazaar directory (see discovery.ts) — an alternative/supplement to
+   * hand-listing SEED_MERCHANT_WALLETS. On by default; set
+   * ENABLE_BAZAAR_DISCOVERY=false to disable if the Bazaar API is
+   * unreachable or misbehaving and you want ingestion to keep running
+   * without it.
+   */
+  enableBazaarDiscovery: (process.env.ENABLE_BAZAAR_DISCOVERY ?? "true") !== "false",
+
+  /** How often the always-on worker loop re-checks the Bazaar, in ms. */
+  bazaarDiscoveryIntervalMs: Number(process.env.BAZAAR_DISCOVERY_INTERVAL_MS ?? 60 * 60_000),
+
+  /**
    * Non-organic activity heuristics (TECH-SPEC.md section 4). These
    * thresholds are our own tunable design choice, not a researched x402/
    * Solana fact — the "e.g. >10 times in 1 hour" in TECH-SPEC.md was

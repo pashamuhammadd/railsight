@@ -565,3 +565,138 @@ export async function getVerifiedVolume(merchantId: string): Promise<VerifiedVol
     generatedAt: new Date().toISOString(),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Payer leaderboard — demand side (/leaderboard?view=payers and /api/payers)
+// ---------------------------------------------------------------------------
+
+export interface PayerLeaderboardEntry {
+  rank: number;
+  payerWallet: string;
+  volume: number;
+  txCount: number;
+  merchantCount: number;
+  firstSeen: string;
+  lastSeen: string;
+}
+
+/**
+ * All-time ranking of *payer* wallets by total USDC spent across every
+ * tracked merchant — the demand side of the leaderboard (who's actually
+ * paying), complementing getLeaderboard()'s supply side (who's getting
+ * paid). Capped at 50 rows; with a hackathon's worth of data this is
+ * effectively "all of them", but caps it so this can't grow unbounded.
+ */
+export async function getPayerLeaderboard(): Promise<PayerLeaderboardEntry[]> {
+  const { rows } = await pool.query<{
+    payer_wallet: string;
+    volume: string;
+    tx_count: number;
+    merchant_count: number;
+    first_seen: string;
+    last_seen: string;
+  }>(
+    `select
+       payer_wallet,
+       coalesce(sum(amount_usdc), 0) as volume,
+       count(*)::int as tx_count,
+       count(distinct merchant_id)::int as merchant_count,
+       min(block_time) as first_seen,
+       max(block_time) as last_seen
+     from x402_transactions
+     where payer_wallet is not null
+     group by payer_wallet
+     order by volume desc, payer_wallet asc
+     limit 50`,
+  );
+
+  return rows.map((r, i) => ({
+    rank: i + 1,
+    payerWallet: r.payer_wallet,
+    volume: Number(r.volume),
+    txCount: r.tx_count,
+    merchantCount: r.merchant_count,
+    firstSeen: r.first_seen,
+    lastSeen: r.last_seen,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Volume spike alert (/ overview banner)
+// ---------------------------------------------------------------------------
+
+export interface VolumeSpike {
+  isSpiking: boolean;
+  windowHours: number;
+  currentVolume: number;
+  currentTxCount: number;
+  /** Baseline daily average volume, scaled to windowHours for an apples-to-apples comparison. Null if there isn't enough trailing history yet. */
+  baselineDailyAvgVolume: number | null;
+  /** currentVolume / (baseline scaled to windowHours). Null if there's no usable baseline. */
+  multiplier: number | null;
+}
+
+/**
+ * Real-time-ish spike detector: compares settled volume in the trailing
+ * `windowHours` against a 14-day trailing baseline (excluding the current
+ * window itself), scaled to the same window length. Flags a spike when
+ * there's at least 3 days of baseline history, at least 5 transactions in
+ * the current window (so a single big payment from an otherwise-quiet
+ * merchant doesn't read as "the whole network is spiking"), and volume is
+ * >= 2x what the baseline would predict for a window this long. These
+ * thresholds are our own tunable design choice (like the non-organic-
+ * activity heuristics in TECH-SPEC.md section 4), not a researched x402/
+ * Solana fact.
+ */
+export async function getVolumeSpike(windowHours = 24): Promise<VolumeSpike> {
+  const { rows } = await pool.query<{
+    current_volume: string;
+    current_tx_count: number;
+    baseline_volume: string;
+    baseline_day_count: number;
+  }>(
+    `with current_window as (
+       select
+         coalesce(sum(amount_usdc), 0) as volume,
+         count(*)::int as tx_count
+       from x402_transactions
+       where block_time >= now() - make_interval(hours => $1::int)
+     ),
+     baseline as (
+       select
+         coalesce(sum(amount_usdc), 0) as volume,
+         count(distinct date_trunc('day', block_time))::int as day_count
+       from x402_transactions
+       where block_time >= now() - make_interval(hours => $1::int) - interval '14 days'
+         and block_time <  now() - make_interval(hours => $1::int)
+     )
+     select
+       cw.volume as current_volume,
+       cw.tx_count as current_tx_count,
+       b.volume as baseline_volume,
+       b.day_count as baseline_day_count
+     from current_window cw, baseline b`,
+    [windowHours],
+  );
+
+  const r = rows[0];
+  const currentVolume = Number(r?.current_volume ?? 0);
+  const currentTxCount = r?.current_tx_count ?? 0;
+  const baselineDayCount = r?.baseline_day_count ?? 0;
+  const hasBaseline = baselineDayCount >= 3;
+
+  const baselineDailyAvgVolume = hasBaseline ? Number(r!.baseline_volume) / baselineDayCount : null;
+  const expectedForWindow = baselineDailyAvgVolume !== null ? baselineDailyAvgVolume * (windowHours / 24) : null;
+  const multiplier = expectedForWindow !== null && expectedForWindow > 0 ? currentVolume / expectedForWindow : null;
+
+  const isSpiking = hasBaseline && currentTxCount >= 5 && multiplier !== null && multiplier >= 2;
+
+  return {
+    isSpiking,
+    windowHours,
+    currentVolume,
+    currentTxCount,
+    baselineDailyAvgVolume,
+    multiplier,
+  };
+}

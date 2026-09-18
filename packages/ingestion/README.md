@@ -61,9 +61,10 @@ than invent them, and this one genuinely isn't published anywhere.
 
 ```bash
 cd packages/ingestion
-npm run once   # single pass, good for testing your .env
-npm run dev    # polls every POLL_INTERVAL_MS (default 60s), restarts on file change
-npm start       # after `npm run build`, runs the compiled dist/
+npm run once      # single pass, good for testing your .env
+npm run discover  # single pass, but forces a Bazaar discovery lookup (ignores the throttle)
+npm run dev       # polls every POLL_INTERVAL_MS (default 60s), restarts on file change
+npm start          # after `npm run build`, runs the compiled dist/
 ```
 
 Requires `HELIUS_API_KEY` and `DATABASE_URL` at minimum — see the root
@@ -75,6 +76,41 @@ symlink to the root one).
 `SEED_MERCHANT_WALLETS` (comma-separated) is a bootstrap convenience for
 local dev only — normally you'd add rows to `merchants` through the API/DB
 directly.
+
+## Auto-discovering merchants via Coinbase CDP's Bazaar
+
+Besides `SEED_MERCHANT_WALLETS`, every ingestion cycle can also pull real,
+currently-active Solana x402 services straight from Coinbase CDP's public
+**Bazaar** directory — a catalog of x402-gated services the CDP facilitator
+has indexed. It's a real, documented, unauthenticated API:
+`GET https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources`
+(paginated via `limit`/`offset`/`total`, no API key required — see
+`docs.cdp.coinbase.com/x402/bazaar` and the discovery-resources API
+reference). `src/discovery.ts` walks every page, keeps only entries whose
+`accepts[]` has a Solana `network` and a `payTo` address, and dedupes by
+wallet. Each discovered wallet is upserted into `merchants` via
+`upsertDiscoveredMerchant()` (`src/db.ts`) — a manually-set `label` is never
+overwritten by the Bazaar's `serviceName`.
+
+`[TODO: confirm]` this was implemented from CDP's documentation, not a live
+test call — this session's sandbox couldn't reach `api.cdp.coinbase.com` to
+verify a real response. Run `npm run discover` from your own machine first
+and read the console output before trusting this for the actual submission;
+if the response schema has drifted from what `discovery.ts` expects, fix
+that file rather than guessing around a failure.
+
+Controlled by two env vars (see `.env.example`), both optional:
+
+- `ENABLE_BAZAAR_DISCOVERY` (default `true`) — set to `false` to disable if
+  the Bazaar API is unreachable or misbehaving and you want ingestion to
+  keep running without it.
+- `BAZAAR_DISCOVERY_INTERVAL_MS` (default `3600000`, 1 hour) — how often the
+  always-on worker loop (`npm run dev`/`npm start`) re-checks the Bazaar.
+  Irrelevant to `--once`/`--discover-only`/a serverless cron invocation,
+  since each of those is a fresh process.
+
+Still USDC-only and Solana-only, matching PRD.md/TECH-SPEC.md's scope —
+non-Solana entries and non-USDC `asset`s are ignored, not broadened.
 
 ## Known limitations (MVP, see TECH-SPEC.md §10 build order)
 

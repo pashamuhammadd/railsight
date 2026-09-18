@@ -34,6 +34,23 @@ export async function seedMerchantsFromConfig(): Promise<void> {
   }
 }
 
+/**
+ * Insert or update a merchant discovered via Bazaar auto-discovery (see
+ * discovery.ts). Uses the wallet address as the id, same convention as
+ * seedMerchantsFromConfig. Only fills in `label` when the merchant
+ * doesn't already have one — a manually-set label always wins over the
+ * Bazaar's `serviceName`.
+ */
+export async function upsertDiscoveredMerchant(wallet: string, serviceName: string | null): Promise<void> {
+  await pool.query(
+    `insert into merchants (id, label, payee_wallet)
+     values ($1, $2, $1)
+     on conflict (id) do update
+       set label = coalesce(merchants.label, excluded.label)`,
+    [wallet, serviceName],
+  );
+}
+
 export interface InsertableTransaction {
   id: string; // tx signature
   slot: number;
