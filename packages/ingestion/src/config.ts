@@ -19,6 +19,19 @@ export const config = {
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS ?? 60_000),
 
   /**
+   * [TODO: confirm] Delay between each merchant's Helius request within a
+   * single poll cycle, in ms — added after auto-discovery grew the tracked
+   * merchant list to 247 wallets and polling them back-to-back with no
+   * delay triggered 429 Too Many Requests on nearly every request. We
+   * couldn't find/verify Helius's actual free-tier requests-per-second cap
+   * in their docs, so this default (300ms, ~3.3 req/s) is our own
+   * conservative starting point, not a confirmed number. Tune down if it
+   * turns out unnecessarily slow, tune up if 429s still show up in the
+   * logs. See helius.ts for the retry-on-429 half of the fix.
+   */
+  heliusRequestDelayMs: Number(process.env.HELIUS_REQUEST_DELAY_MS ?? 300),
+
+  /**
    * Comma-separated Solana wallet addresses to seed as tracked merchants on
    * first run, e.g. "MerchantWallet1...,MerchantWallet2...". Optional — you
    * can also insert rows into `merchants` directly. Ingestion always reads

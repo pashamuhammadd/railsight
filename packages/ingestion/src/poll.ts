@@ -2,6 +2,11 @@ import { fetchAddressTransactions } from "./helius.js";
 import { extractUsdcTransfersTo } from "./parse.js";
 import { classifyFacilitator } from "./classify.js";
 import { getTrackedMerchants, insertTransaction } from "./db.js";
+import { config } from "./config.js";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * One polling pass: for every tracked merchant, pull their most recent
@@ -12,15 +17,28 @@ import { getTrackedMerchants, insertTransaction } from "./db.js";
  * wallet rather than persisting a per-merchant pagination cursor. Inserts
  * are idempotent (`on conflict (id) do nothing`), so this is safe to run
  * on a fixed interval — it just re-checks recent history each time.
- * Fine for a handful of merchants; revisit if the merchant list grows or
- * Helius rate limits become a problem (see PRD.md's open question about
- * Helius free-tier limits).
+ *
+ * **Rate limiting (confirmed necessary, not hypothetical):** once
+ * Bazaar auto-discovery grew the tracked merchant list past ~250 wallets,
+ * polling them with no delay between requests triggered 429 Too Many
+ * Requests from Helius on nearly every wallet. Fixed with a
+ * `config.heliusRequestDelayMs` pause between each merchant (see
+ * config.ts — the exact number is our own conservative default, not a
+ * confirmed Helius limit) plus retry-on-429 in helius.ts. This makes a
+ * full pass over a large merchant list take longer (e.g. 250 merchants x
+ * 300ms ≈ 75s) but that's fine for the local always-on worker loop (no
+ * hard timeout) — see apps/web/src/lib/ingest-cron.ts for how the
+ * *serverless* cron path handles this differently (a merchant-count cap +
+ * randomized order, since Vercel's function has a hard 60s ceiling).
  */
 export async function pollOnce(): Promise<{ merchantsChecked: number; inserted: number }> {
   const merchants = await getTrackedMerchants();
   let inserted = 0;
 
-  for (const merchant of merchants) {
+  for (let i = 0; i < merchants.length; i++) {
+    const merchant = merchants[i];
+    if (i > 0) await sleep(config.heliusRequestDelayMs);
+
     let txs;
     try {
       txs = await fetchAddressTransactions(merchant.payeeWallet, { limit: 100 });

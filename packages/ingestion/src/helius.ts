@@ -32,6 +32,10 @@ export interface HeliusEnhancedTransaction {
   tokenTransfers: HeliusTokenTransfer[];
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Fetch recent transactions involving a given wallet address, newest first.
  *
@@ -39,6 +43,15 @@ export interface HeliusEnhancedTransaction {
  * @param opts.beforeSignature pagination cursor — pass the last signature
  *   from a previous page to keep going backwards in time
  * @param opts.limit 1-100, defaults to 100
+ *
+ * [TODO: confirm] Helius's free-tier requests-per-second cap isn't
+ * documented with a specific number we could find/verify, so this retries
+ * on 429 (honoring a `Retry-After` header when Helius sends one, else a
+ * fixed backoff) up to twice before giving up on that one address —
+ * confirmed necessary in practice: polling 247 merchants back-to-back with
+ * no delay (after Bazaar auto-discovery grew the merchant list) triggered
+ * 429s on nearly every request. See poll.ts's inter-request delay
+ * (`config.heliusRequestDelayMs`) for the other half of the fix.
  */
 export async function fetchAddressTransactions(
   address: string,
@@ -51,13 +64,27 @@ export async function fetchAddressTransactions(
     url.searchParams.set("before-signature", opts.beforeSignature);
   }
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
+  const maxRetries = 2;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url.toString());
+    if (res.ok) {
+      return (await res.json()) as HeliusEnhancedTransaction[];
+    }
+
+    if (res.status === 429 && attempt < maxRetries) {
+      const retryAfterHeader = res.headers.get("retry-after");
+      const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : NaN;
+      const backoffMs = Number.isFinite(retryAfterMs) && retryAfterMs > 0 ? retryAfterMs : 1000 * (attempt + 1);
+      await sleep(backoffMs);
+      continue;
+    }
+
     const body = await res.text().catch(() => "<no body>");
     throw new Error(
       `Helius request failed: ${res.status} ${res.statusText} for ${address} — ${body}`,
     );
   }
 
-  return (await res.json()) as HeliusEnhancedTransaction[];
+  // Unreachable — the loop above always returns or throws — but keeps TS happy.
+  throw new Error(`Helius request failed for ${address}: exhausted retries`);
 }

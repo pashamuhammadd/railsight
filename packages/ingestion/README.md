@@ -92,12 +92,16 @@ wallet. Each discovered wallet is upserted into `merchants` via
 `upsertDiscoveredMerchant()` (`src/db.ts`) — a manually-set `label` is never
 overwritten by the Bazaar's `serviceName`.
 
-`[TODO: confirm]` this was implemented from CDP's documentation, not a live
-test call — this session's sandbox couldn't reach `api.cdp.coinbase.com` to
-verify a real response. Run `npm run discover` from your own machine first
-and read the console output before trusting this for the actual submission;
-if the response schema has drifted from what `discovery.ts` expects, fix
-that file rather than guessing around a failure.
+**Confirmed working** (Pasha ran `npm run discover` from his own machine on
+2026-09-18): found 236 real Solana merchants on the first call. The schema
+assumed in `discovery.ts` matches what the API actually returns.
+
+Heads up — running discovery for the first time on an established install
+will jump your tracked-merchant count a lot (14 → 247 in that same run),
+which immediately exposed a Helius rate-limit problem: see "Rate limiting"
+below. If you're re-running this fresh, expect the same thing and don't be
+alarmed by a wall of 429 errors on the *next* `npm run once`/`npm run dev` —
+that's what the fix below is for.
 
 Controlled by two env vars (see `.env.example`), both optional:
 
@@ -112,13 +116,37 @@ Controlled by two env vars (see `.env.example`), both optional:
 Still USDC-only and Solana-only, matching PRD.md/TECH-SPEC.md's scope —
 non-Solana entries and non-USDC `asset`s are ignored, not broadened.
 
+## Rate limiting (confirmed necessary, not hypothetical)
+
+The first real run of Bazaar discovery grew the tracked merchant list from
+14 to 247 wallets, and polling all of them with no delay between Helius
+requests triggered `429 Too Many Requests` on nearly every single one.
+Fixed in `src/helius.ts` (`fetchAddressTransactions`) and `src/poll.ts`:
+
+- Each merchant's request now waits `HELIUS_REQUEST_DELAY_MS` (default
+  `300`, see `.env.example`) after the previous one.
+- A `429` response is retried up to twice, honoring Helius's `Retry-After`
+  header when present, else a fixed 1s/2s backoff.
+
+`[TODO: confirm]` the 300ms default is our own conservative starting point
+— we couldn't find/verify Helius's actual free-tier requests-per-second
+cap in their docs. Tune `HELIUS_REQUEST_DELAY_MS` down if it turns out
+unnecessarily slow (a full pass over 247 merchants takes ~75s at the
+default), or up if 429s still show up in the logs after this fix.
+
+`apps/web/src/lib/ingest-cron.ts` (the Vercel Cron path) has the same
+fix, plus a merchant-count cap (`CRON_MERCHANT_LIMIT`, default `80`) and
+random polling order, since that route also has to fit inside Vercel's
+60s `maxDuration` — see the comments in that file.
+
 ## Known limitations (MVP, see TECH-SPEC.md §10 build order)
 
 - Re-fetches the last 100 transactions per wallet every poll instead of
   persisting a pagination cursor — fine for a handful of merchants and a
-  hackathon timeline, wasteful at scale.
+  hackathon timeline, wasteful at scale, and now that Bazaar discovery
+  can grow the list into the hundreds, this is the main thing worth
+  revisiting next if there's time (a per-merchant `before-signature`
+  cursor would cut most of the redundant re-fetching).
 - No Helius webhook support yet (TECH-SPEC.md mentions this as the
   alternative to polling) — polling was simpler to get working first and
   doesn't require a public HTTPS endpoint for Helius to call back to.
-- No retry/backoff on Helius rate limits — if you hit the free-tier limit,
-  requests will just fail and log; the next poll cycle will pick things up.

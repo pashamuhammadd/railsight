@@ -48,6 +48,16 @@ const cronConfig = {
     .filter(Boolean),
   facilitatorFeePayers: parseFacilitatorMap(process.env.FACILITATOR_FEE_PAYERS),
   enableBazaarDiscovery: (process.env.ENABLE_BAZAAR_DISCOVERY ?? "true") !== "false",
+  // [TODO: confirm] same conservative, unverified default as
+  // packages/ingestion/src/config.ts — see the big comment on pollOnce()
+  // below for why this exists.
+  heliusRequestDelayMs: Number(process.env.HELIUS_REQUEST_DELAY_MS ?? 300),
+  // Caps how many merchants one cron invocation polls, so a large
+  // (Bazaar-grown) merchant list can't blow past Vercel's maxDuration
+  // (60s on the route, see route.ts). getTrackedMerchants() below picks a
+  // random subset each run so coverage rotates across days rather than
+  // always polling the same alphabetically-first wallets.
+  cronMerchantLimit: Number(process.env.CRON_MERCHANT_LIMIT ?? 80),
   heuristics: {
     identicalAmountLoopThreshold: Number(process.env.HEURISTIC_IDENTICAL_AMOUNT_LOOP_THRESHOLD ?? 10),
     volumeWindowDays: Number(process.env.HEURISTIC_VOLUME_WINDOW_DAYS ?? 7),
@@ -76,17 +86,41 @@ interface HeliusEnhancedTransaction {
   tokenTransfers: HeliusTokenTransfer[];
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * [TODO: confirm] Mirrors the retry-on-429 fix in
+ * packages/ingestion/src/helius.ts — confirmed necessary when the tracked
+ * merchant list grew past ~250 wallets (Bazaar discovery) and back-to-back
+ * requests started getting 429'd on nearly every call.
+ */
 async function fetchAddressTransactions(address: string, limit = 100): Promise<HeliusEnhancedTransaction[]> {
   const url = new URL(`${HELIUS_BASE_URL}/v0/addresses/${address}/transactions`);
   url.searchParams.set("api-key", cronConfig.heliusApiKey);
   url.searchParams.set("limit", String(limit));
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
+  const maxRetries = 2;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url.toString());
+    if (res.ok) {
+      return (await res.json()) as HeliusEnhancedTransaction[];
+    }
+
+    if (res.status === 429 && attempt < maxRetries) {
+      const retryAfterHeader = res.headers.get("retry-after");
+      const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : NaN;
+      const backoffMs = Number.isFinite(retryAfterMs) && retryAfterMs > 0 ? retryAfterMs : 1000 * (attempt + 1);
+      await sleep(backoffMs);
+      continue;
+    }
+
     const body = await res.text().catch(() => "<no body>");
     throw new Error(`Helius request failed: ${res.status} ${res.statusText} for ${address} — ${body}`);
   }
-  return (await res.json()) as HeliusEnhancedTransaction[];
+
+  throw new Error(`Helius request failed for ${address}: exhausted retries`);
 }
 
 // --- parse.ts ------------------------------------------------------------
@@ -218,9 +252,16 @@ async function seedMerchantsFromConfig(): Promise<void> {
   }
 }
 
+/**
+ * Random subset, capped at `cronConfig.cronMerchantLimit` — see the
+ * comment on that config field. `order by random()` means a different
+ * subset gets polled each cron invocation, so coverage rotates across
+ * days instead of permanently starving whichever wallets sort last.
+ */
 async function getTrackedMerchants(): Promise<Array<{ id: string; payeeWallet: string }>> {
   const { rows } = await pool.query<{ id: string; payee_wallet: string }>(
-    "select id, payee_wallet from merchants order by id",
+    "select id, payee_wallet from merchants order by random() limit $1",
+    [cronConfig.cronMerchantLimit],
   );
   return rows.map((r) => ({ id: r.id, payeeWallet: r.payee_wallet }));
 }
@@ -247,11 +288,22 @@ async function insertTransaction(tx: {
 
 // --- poll.ts ---------------------------------------------------------------
 
+/**
+ * Same rate-limiting fix as packages/ingestion/src/poll.ts (delay between
+ * requests + retry-on-429 in fetchAddressTransactions above), plus the
+ * merchant-count cap from getTrackedMerchants() so a full pass — including
+ * the delay — fits inside Vercel's maxDuration for this route (60s, see
+ * route.ts). E.g. 80 merchants x 300ms ≈ 24s, leaving headroom for Bazaar
+ * discovery + the flagging queries below.
+ */
 async function pollOnce(): Promise<{ merchantsChecked: number; inserted: number }> {
   const merchants = await getTrackedMerchants();
   let inserted = 0;
 
-  for (const merchant of merchants) {
+  for (let i = 0; i < merchants.length; i++) {
+    const merchant = merchants[i];
+    if (i > 0) await sleep(cronConfig.heliusRequestDelayMs);
+
     let txs: HeliusEnhancedTransaction[];
     try {
       txs = await fetchAddressTransactions(merchant.payeeWallet, 100);
